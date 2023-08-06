@@ -1,0 +1,196 @@
+CREATE DATABASE LIBRARY;
+USE LIBRARY;
+-- FIRST TABLE BRANCH --
+DROP  TABLE BRANCH;
+
+CREATE TABLE BRANCH ( 
+	BRANCH_NO INT PRIMARY KEY NOT NULL,
+	MANAGER_ID  INT UNIQUE  NOT NULL,
+	BRANCH_ADDRESS VARCHAR (40),
+	CONTACT_NO VARCHAR (20) );
+ -- CREATING A STORED PROCEDURE SO THAT DATA ENTRY IN LATER STAGES WILL BE EASY--
+ DROP PROCEDURE DETAILS_INSERTION;
+ DELIMITER $$ 
+	CREATE PROCEDURE DETAILS_INSERTION (IN BRANCH_NO INT, IN MANAGER_ID INT, IN BRANCH_ADDRESS VARCHAR (40), IN CONTACT_NO VARCHAR(20) )
+	BEGIN
+	INSERT INTO BRANCH VALUES(BRANCH_NO,MANAGER_ID,BRANCH_ADDRESS,CONTACT_NO);
+	END $$
+ DELIMITER ;
+ 
+	CALL DETAILS_INSERTION (1,101,"KERALA",'9887545555');
+	CALL DETAILS_INSERTION (2,102,"TAMILNADU",'9887545545');
+	CALL DETAILS_INSERTION (3,103,"KARNATAKA",'9887545535');
+	CALL DETAILS_INSERTION (4,104,"ANDHARA PRADESH",'9887545525');
+	CALL DETAILS_INSERTION (5,105,"MAHARASHTRA",'9887545515');
+ SELECT * FROM BRANCH ;
+---------------------------------------------------------------------------------------------------------------------
+-- SECOND TABLE EMPLOYEE --
+CREATE TABLE EMPLOYEE ( 
+	EMPLOYEE_ID INT PRIMARY KEY NOT NULL,
+	EMPLOYEE_NAME VARCHAR (40) NOT NULL,
+	POSITION VARCHAR (20),
+	SALARY FLOAT) ;
+ALTER TABLE EMPLOYEE ADD FOREIGN KEY (EMPLOYEE_ID)
+REFERENCES  BRANCH(MANAGER_ID)
+ON DELETE CASCADE 
+ON UPDATE CASCADE ;
+
+	INSERT INTO  EMPLOYEE VALUES  (101,"AAYISHA","ASSISTANT",25000.00);
+	INSERT INTO  EMPLOYEE VALUES (102,"ANUSHA","ADMINISTRATOR",55000.00);
+	INSERT INTO  EMPLOYEE VALUES (103,"HARSHIT","MANAGER",52000.00);
+	INSERT INTO  EMPLOYEE VALUES (104,"ARYA","EXECUTIVE",30000.00);
+	INSERT INTO  EMPLOYEE VALUES (105,"MINNA","ASSOCIATE",35000.00); 
+	 
+ SELECT * FROM EMPLOYEE;
+-----------------------------------------------------------------------------------------------------------------
+
+-- TABLE 3 CUSTOMER --
+CREATE TABLE CUSTOMER (
+	CUSTOMER_ID INT PRIMARY KEY NOT NULL,
+    CUSTOMER_NAME VARCHAR(30),
+    CUSTOMER_ADRESS VARCHAR(30),
+    REG_DATE DATE NOT NULL);
+INSERT INTO CUSTOMER (CUSTOMER_ID,CUSTOMER_NAME,CUSTOMER_ADRESS,REG_DATE)VALUES
+	(201,"KARTHIKA","1/18,THRISSUR" , "2019-03-08"),
+	(202,"HARI","3/27,MANAKODY" , "2020-05-03"),
+	(203,"ATHIRA","9/17,CHERPU" , "2018-07-04"),
+	(204,"SREELAKSHMI","12/5,OLLUR" , "2017-04-08"),
+	(205,"SHRIDEVI","7/25," , "2020-05-03");
+SELECT*FROM CUSTOMER;
+
+---------------------------------------------------------------------------------------------------------------------
+-- TABLE  BOOK--
+
+
+DROP TABLE BOOK;
+CREATE TABLE BOOK  ( 
+	ISBN INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+	BOOK_TITLE VARCHAR(40) NOT NULL,
+	CATEGORY VARCHAR (30) NOT NULL,
+	BOOK_STATUS VARCHAR(10),
+	RENTAL_PRICE FLOAT NOT NULL,
+	AUTHOR VARCHAR(30) NOT NULL,
+	PUBLISHER VARCHAR (30) NOT NULL
+);
+INSERT INTO BOOK (ISBN,BOOK_TITLE,CATEGORY,RENTAL_PRICE, BOOK_STATUS,AUTHOR,PUBLISHER ) VALUES
+	(1001 ,"ALCHEMIST" ,"FICTION",150,"YES","PAULO COELHO","HARPERTORCH"),
+	(1002,"THE KITE RUNNER","FICTION",120,"YES","KHALED HOSSINI","BLOOMSBERRY"),
+	(1003,"THE GREAT GATSBY","FICTION",100,"NO","F.SCOTT","CHARLES SCRIBNNER"),
+	(1004,"DIARY OF A YOUNG GIRL","HISTORY",180,"NO","ANNE FRANK","FINGER PRINT"),
+	(1005,"BURY MY HEART AT WOUNDED KNEE","HISTORY",110,"YES", "DEE BROWN", "FINGER PRINT"),
+	(1006,"THE SUBTLE ART OF NOT GIVING A FUCK","SELF-HELP",110,"NO", "MARK MANSON", "MCB"),
+	(1007,"BRIEF HISTORY OF TIME","SCIENCE",200,"YES", "STEPHEN HAWKINGS", "DEED"),
+	(1008,"COSMOS","SCIENCE",250,"NO", "CARL SAGAN", "DEED");
+SELECT * FROM BOOK;
+UPDATE BOOK SET BOOK_TITLE = "THE SUBTLE ART OF NOT GIVING A FUCK" , CATEGORY ="SELF HELP", AUTHOR ="MARK MANSON" WHERE ISBN=1006;
+-------------------------------------------------------------------------------------------------------------------
+-- TABLE ISSUE_STATUS --
+CREATE TABLE ISSUE_STATUS (
+	ISSUE_ID INT PRIMARY KEY AUTO_INCREMENT ,
+	ISSUED_BOOK_NAME VARCHAR(40) NOT NULL,
+	ISSUED_DATE DATE ,
+	ISSUED_CUSTOMER INT,
+	ISBN_BOOK INT,
+	FOREIGN KEY  (ISSUED_CUSTOMER) REFERENCES CUSTOMER(CUSTOMER_ID),
+	FOREIGN KEY  (ISBN_BOOK) REFERENCES BOOK(ISBN));
+    
+    DROP TABLE ISSUE_STATUS;
+    
+INSERT INTO ISSUE_STATUS (ISSUE_ID,ISSUED_BOOK_NAME,ISSUED_DATE,ISSUED_CUSTOMER,ISBN_BOOK) VALUES
+	(401,"THE GREAT GATSBY", "2021-08-03",201,1003),
+	(402,"DIARY OF A YOUNG GIRL","2021-09-03",202,1004),
+	(403,	"BURY MY HEART AT WOUNDED KNEE","2022-01-22",203,1005),
+	(404,"THE SUBTLE ART OF NOT GIVING A FUCK ", "2022-03-22",	204,1006),
+	(405,"COSMOS","2022-06-17",205,1008);
+
+UPDATE ISSUE_STATUS SET ISSUED_DATE ="2023-06-22" WHERE ISSUE_ID=405;
+
+
+SELECT * FROM ISSUE_STATUS;
+-------------------------------------------------------------------------------------------------------------------
+-- TABLE RETURN STATUS --
+CREATE TABLE RETURN_STATUS(
+	RETURN_ID INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+	RETURN_CUSTOMER VARCHAR (30) NOT NULL,
+	RETURN_BOOK_NAME VARCHAR(40) NOT NULL,
+	RETURN_DATE DATE NOT NULL,
+	ISBN_BOOK2	INT,
+	FOREIGN KEY (ISBN_BOOK2) REFERENCES BOOK(ISBN)
+);
+DROP TABLE RETURN_STATUS;
+INSERT INTO RETURN_STATUS (	RETURN_ID,RETURN_CUSTOMER,RETURN_BOOK_NAME,RETURN_DATE,ISBN_BOOK2) VALUES
+	(501,"KARTHIKA ", "THE GREAT GATSBY",'2021-09-03',1003),
+	(502,"ATHIRA","BURY MY HEART AT WOUNDED KNEE", '2021-10-03',1005),
+	(503,"SHRIDEVI","COSMOS",'2022-07-18',1008);
+
+SELECT * FROM BOOK;
+SELECT * FROM BRANCH;
+SELECT * FROM CUSTOMER;
+SELECT * FROM EMPLOYEE;
+SELECT * FROM ISSUE_STATUS;
+SELECT * FROM RETURN_STATUS;
+-----------------------------------------------------------------------------------------------------------------------
+-- QUERIES --
+/*Retrieve the book title, category, and rental price of all available 
+books.*/
+
+	SELECT BOOK_TITLE,CATEGORY,RENTAL_PRICE FROM	BOOK WHERE BOOK_STATUS ="YES";
+----------------------------------------------------------------------------------------------------------------------
+/*List the employee names and their respective salaries in descending 
+order of salary*/
+
+	SELECT EMPLOYEE_NAME,SALARY FROM EMPLOYEE ORDER BY SALARY DESC;
+-------------------------------------------------------------------------------------------------------------------------
+/* Retrieve the book titles and the corresponding customers who have 
+issued those books */
+
+SELECT	issue_status.ISSUED_BOOK_NAME,CUSTOMER.CUSTOMER_NAME
+	FROM issue_status INNER JOIN CUSTOMER
+	ON	issue_status .ISSUED_CUSTOMER=	CUSTOMER.CUSTOMER_ID; 
+---------------------------------------------------------------------------------------------------------------------
+/*Display the total count of books in each category.*/
+
+SELECT Category,count(ISBN) FROM book GROUP BY Category;
+---------------------------------------------------------------------------------------------------------------------
+/*Retrieve the employee names and their positions for the employees 
+whose salaries are above Rs.50,000*/
+
+SELECT EMPLOYEE_NAME, POSITION FROM EMPLOYEE WHERE SALARY>50000;
+-----------------------------------------------------------------------------------------------------------------------			
+/*List the customer names who registered before 2022-01-01 and have 
+not issued any books yet.*/
+
+SELECT	CUSTOMER.CUSTOMER_NAME, CUSTOMER.REG_DATE 
+	FROM CUSTOMER  LEFT JOIN ISSUE_STATUS
+	ON	CUSTOMER.CUSTOMER_ID=issue_status .ISSUED_CUSTOMER
+	WHERE ISSUE_ID IS NULL  AND REG_DATE<'22-01-01' ;
+---------------------------------------------------------------------------------------------------------------------
+
+/*. Display the branch numbers and the total count of employees in each 
+branch*/
+
+
+SELECT	BRANCH.BRANCH_NO, COUNT(EMPLOYEE.EMPLOYEE_NAME) 
+	FROM BRANCH  LEFT JOIN EMPLOYEE
+	ON	BRANCH.MANAGER_ID= EMPLOYEE.EMPLOYEE_ID
+	GROUP BY BRANCH_NO;
+---------------------------------------------------------------------------------------------------------------------
+/*Display the names of customers who have issued books in the month
+ of June 2023.*/
+ 
+SELECT CUSTOMER.CUSTOMER_NAME, ISSUE_STATUS.ISSUED_DATE
+	FROM CUSTOMER  LEFT JOIN ISSUE_STATUS
+	ON	CUSTOMER.CUSTOMER_ID= ISSUE_STATUS.ISSUED_CUSTOMER
+	WHERE MONTHNAME(ISSUE_STATUS.ISSUED_DATE)= "JUNE" AND YEAR(ISSUE_STATUS.ISSUED_DATE) = "2023";
+ 
+-----------------------------------------------------------------------------------------------------------------------
+/* Retrieve book_title from book table containing history. */
+SELECT BOOK_TITLE FROM BOOK WHERE CATEGORY ="HISTORY";
+
+------------------------------------------------------------------------------------------------------------------------
+/*Retrieve the branch numbers along with the count of employees for
+-- branches having more than 5 employees.*/
+ SELECT BRANCH.BRANCH_NO, COUNT(EMPLOYEE.EMPLOYEE_NAME)
+	FROM BRANCH  LEFT JOIN EMPLOYEE
+	ON	BRANCH.MANAGER_ID= EMPLOYEE.EMPLOYEE_ID
+	GROUP BY BRANCH_NO HAVING COUNT(BRANCH.BRANCH_NO)>5;
